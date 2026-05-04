@@ -8,8 +8,6 @@ import {
   HardDrive, Zap, X, ArrowDown,
 } from 'lucide-react';
 
-// ---------- Types ----------
-
 interface Service {
   id: string;
   name: string;
@@ -28,8 +26,6 @@ interface Service {
 
 interface FaqItemData { q: string; a: string; }
 interface FaqGroup { title: string; items: FaqItemData[]; }
-
-// ---------- Data ----------
 
 const SERVICES: Service[] = [
   {
@@ -129,8 +125,6 @@ const FAQ_GROUPS: FaqGroup[] = [
     ],
   },
 ];
-
-// ---------- Components ----------
 
 const mono = { fontFamily: "'IBM Plex Mono', monospace" };
 
@@ -251,8 +245,12 @@ const ServiceSpec = ({ service, onInspect }: { service: Service; onInspect: () =
       <div className="p-4 space-y-3">
         <p className="text-[12px] text-cyan-300 leading-relaxed">{service.purpose}</p>
         <dl className="grid grid-cols-1 gap-2 pt-2 border-t border-cyan-500/10" style={mono}>
-          {(['stack', service.stack.join(' · ')], ['ports', service.ports], ['compute', service.resources], ['fork', service.fork]) &&
-           [['stack', service.stack.join(' · ')], ['ports', service.ports], ['compute', service.resources], ['fork', service.fork]].map(([k, v]) => (
+          {[
+            ['stack', service.stack.join(' · ')],
+            ['ports', service.ports],
+            ['compute', service.resources],
+            ['fork', service.fork],
+          ].map(([k, v]) => (
             <div key={k} className="flex gap-2 text-[11px]">
               <dt className="text-cyan-700 w-16 shrink-0">{k}</dt>
               <dd className="text-cyan-200">{v}</dd>
@@ -335,8 +333,6 @@ const FaqItem = ({ q, a }: FaqItemData) => {
   );
 };
 
-// ---------- Main ----------
-
 export default function Blueprint() {
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -345,14 +341,14 @@ export default function Blueprint() {
     link.href = 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@500;600&display=swap';
     link.rel = 'stylesheet';
     document.head.appendChild(link);
-    return () => { try { document.head.removeChild(link); } catch {/* noop */} };
+    return () => { try { document.head.removeChild(link); } catch { /* noop */ } };
   }, []);
 
   return (
     <div className="min-h-screen relative text-cyan-100"
          style={{
            backgroundColor: '#06121F',
-           backgroundImage: `linear-gradient(rgba(34,211,238,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,0.04) 1px,transparent 1px)`,
+           backgroundImage: 'linear-gradient(rgba(34,211,238,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,0.04) 1px,transparent 1px)',
            backgroundSize: '24px 24px',
            fontFamily: "'IBM Plex Sans', sans-serif",
          }}>
@@ -361,7 +357,6 @@ export default function Blueprint() {
 
       <div className="relative max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12">
 
-        {/* Header */}
         <header className="mb-10">
           <div className="flex items-baseline justify-between mb-4 flex-wrap gap-3">
             <div className="text-[10px] uppercase tracking-[0.3em] text-cyan-500" style={mono}>◇ technical blueprint</div>
@@ -378,13 +373,11 @@ export default function Blueprint() {
           <div className="mt-6"><TitleBlock /></div>
         </header>
 
-        {/* § 01 — System Architecture */}
         <section className="mb-14">
           <div className="flex items-baseline justify-between mb-6">
             <h2 className="text-[11px] uppercase tracking-[0.3em] text-cyan-400" style={mono}>§ 01 — system architecture</h2>
             <span className="text-[10px] text-cyan-700" style={mono}>5 layers / 14 components</span>
           </div>
-
           <LayerLabel>L1 · external</LayerLabel>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-2">
             <Node icon={Globe} title="clients" sub="web · mobile · api consumers" />
@@ -392,7 +385,6 @@ export default function Blueprint() {
             <Node icon={GitFork} title="github" sub="ci/cd source · webhook trigger" />
           </div>
           <Connector count={3} label="https / federation / webhook" />
-
           <LayerLabel>L2 · edge</LayerLabel>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
             <Node icon={Shield} title="cloudflare" sub="dns · waf · ddos · http/3" tags={['proxied', 'rate-limit']} />
@@ -400,7 +392,6 @@ export default function Blueprint() {
             <Node icon={Shield} title="ufw + fail2ban" sub="22 · 80 · 443 · 8448" tags={['key-only ssh']} />
           </div>
           <Connector count={4} label="reverse proxy" />
-
           <LayerLabel>L3 · application services</LayerLabel>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2">
             {SERVICES.map((s) => (
@@ -409,7 +400,6 @@ export default function Blueprint() {
             ))}
           </div>
           <Connector count={4} label="tcp / unix sockets" />
-
           <LayerLabel>L4 · data plane</LayerLabel>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2">
             <Node icon={Database} title="postgres 16" sub="schema-isolated per service" tags={['wal stream', 'logical repl']} />
@@ -418,7 +408,6 @@ export default function Blueprint() {
             <Node icon={Box} title="borg" sub="encrypted nightly backup" tags={['90d retention']} />
           </div>
           <Connector count={4} />
-
           <LayerLabel>L5 · host platform</LayerLabel>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Node icon={Server} title="hetzner ccx52" sub="dedicated vcpu · falkenstein" tags={['eu', 'iso-27001']} />
@@ -428,7 +417,6 @@ export default function Blueprint() {
           </div>
         </section>
 
-        {/* § 02 — Service Spec Sheets */}
         <section className="mb-14">
           <div className="flex items-baseline justify-between mb-6">
             <h2 className="text-[11px] uppercase tracking-[0.3em] text-cyan-400" style={mono}>§ 02 — service spec sheets</h2>
@@ -439,7 +427,6 @@ export default function Blueprint() {
           </div>
         </section>
 
-        {/* § 03 — Data Flows */}
         <section className="mb-14">
           <div className="flex items-baseline justify-between mb-6">
             <h2 className="text-[11px] uppercase tracking-[0.3em] text-cyan-400" style={mono}>§ 03 — primary data flows</h2>
@@ -466,7 +453,6 @@ export default function Blueprint() {
           </div>
         </section>
 
-        {/* § 04 — Technical Q&A */}
         <section className="mb-14">
           <div className="flex items-baseline justify-between mb-6">
             <h2 className="text-[11px] uppercase tracking-[0.3em] text-cyan-400" style={mono}>§ 04 — technical Q&amp;A reference</h2>
@@ -489,7 +475,6 @@ export default function Blueprint() {
           </div>
         </section>
 
-        {/* Footer */}
         <footer className="mt-16 pt-6 border-t border-cyan-500/20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[10px] text-cyan-600" style={mono}>
             <div><div className="text-cyan-400 mb-1.5">▸ legend</div><div>L# — architectural layer</div><div>§# — document section</div><div>◇ — drawing marker</div></div>
