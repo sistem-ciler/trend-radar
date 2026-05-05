@@ -1,34 +1,46 @@
-import { NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { runPipeline } from '@/lib/agent/pipeline'
 import { setCachedDigest } from '@/lib/cache'
 
-export const runtime = 'nodejs'
-export const maxDuration = 300
 export const dynamic = 'force-dynamic'
+export const maxDuration = 300
 
-export async function GET(req: Request) {
-  const auth = req.headers.get('authorization')
-  if (
-    process.env.CRON_SECRET &&
-    auth !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+export async function GET(req: NextRequest) {
+  const secret =
+    req.headers.get('x-cron-secret') ??
+    req.nextUrl.searchParams.get('secret')
+
+  if (process.env.CRON_SECRET && secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  const start = Date.now()
-  const digest = await runPipeline()
-  await setCachedDigest(digest)
+  const t0 = Date.now()
+  try {
+    const digest = await runPipeline()
+    await setCachedDigest(digest)
 
-  return NextResponse.json({
-    ok: true,
-    durationMs: Date.now() - start,
-    date: digest.date,
-    trendCount: digest.trends.length,
-    totalPosts: digest.totalPosts,
-    sourceHealth: digest.sourceHealth.map((s) => ({
-      source: s.source,
-      ok: s.ok,
-      postCount: s.postCount,
-    })),
-  })
+    return NextResponse.json({
+      ok: true,
+      date: digest.date,
+      trends: digest.trends.length,
+      totalPosts: digest.totalPosts,
+      sources: digest.sourceHealth.map((s) => ({
+        source: s.source,
+        ok: s.ok,
+        posts: s.postCount,
+        error: s.error,
+      })),
+      durationMs: Date.now() - t0,
+    })
+  } catch (err) {
+    console.error('[cron/batch] pipeline failed', err)
+    return NextResponse.json(
+      {
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+        durationMs: Date.now() - t0,
+      },
+      { status: 500 }
+    )
+  }
 }
