@@ -20,6 +20,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 RUN pnpm rebuild sharp
+RUN mkdir -p public
 RUN pnpm build
 
 FROM node:22-alpine AS runner
